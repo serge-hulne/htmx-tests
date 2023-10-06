@@ -18,7 +18,14 @@ ROOT   = "root"
 # Server
 # ====================
 
-state : Int64 = 0
+class State
+  property counter : Int64
+  def initialize (counter : Int64)
+    @counter = counter
+  end
+end
+
+state = State.new(0)
 
 spawn do #
   Kemal.config.port = (ENV["PORT"]? || PORT).to_i
@@ -28,10 +35,8 @@ spawn do #
 
   # Root
   get "/#{ROOT}" do
-    Log.info { "State: #{state}" }
-
-    <<-HTML
-    
+    Log.info { "State: #{state.counter}" }
+    <<-HTML    
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/debug.js"></script>
 
@@ -40,23 +45,27 @@ spawn do #
     <div>
       <h1> HTMX tests </h1>
     </div>
-
-    <div> 
-      <button hx-post="/increment" hx-target="#counter">
-        increment
-      </button>
-    </div>
     
-    <div id="counter"> Counter: #{state} </div>
+    <form>
+        <br>
+        <button hx-post="/increment" hx-target="#cpt">
+            increment counter
+        </button>
+    </form>
+    <br>
+    <div id="cpt"> 
+      <div> Counter: 0 </div>
+    </div>
     HTML
   end
 
   # Increment
-  post "/increment" do
-    state = state + 1
-    Log.info { "State -> #{state}" }
+  post "/increment" do |env|
+    ###
+    state.counter = state.counter + 1 
+    Log.info { "State -> #{state.counter}" }
     <<-HTML
-      <div id="counter"> Counter (modified): #{state} </div>
+    <div> Counter: #{state.counter} </div>
     HTML
   end
 
