@@ -1,0 +1,19 @@
+name: testing
+version: 0.1.0
+
+authors:
+  - serge <serge.hulne@gmail.com>
+
+targets:
+  testing:
+    main: src/testing.cr
+
+crystal: 1.9.2
+
+license: MIT
+
+dependencies:
+  kemal:
+    github: kemalcr/kemal
+  webview:
+    github: naqvis/webview
