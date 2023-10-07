@@ -21,7 +21,7 @@ ROOT   = "root"
 class Store(T)
   property cin, cout : Channel(T)
 
-  def initialize()
+  def initialize
     @cin = Channel(T).new
     @cout = Channel(T).new
   end
@@ -86,7 +86,7 @@ spawn do #
     
     <form>
         <br>
-        <button hx-post="/increment" hx-target="#cpt">
+        <button hx-post="/increment" hx-target="#cpt" hx-ext="debug">
             increment counter
         </button>
     </form>
