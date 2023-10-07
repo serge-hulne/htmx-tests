@@ -14,18 +14,54 @@ WIDTH  =  800
 HEIGHT =  800
 ROOT   = "root"
 
+# ================
+# Store
+# ================
+
+class Store(T)
+  property cin, cout : Channel(T)
+
+  def initialize()
+    @cin = Channel(T).new
+    @cout = Channel(T).new
+  end
+
+  def run
+    spawn do
+      while true
+        _innerState = @cin.receive
+        @cout.send(_innerState)
+      end
+    end
+  end
+
+  def set(value : State)
+    @cin.send(value)
+  end
+
+  def get : State
+    return value = @cout.receive
+  end
+end
+
 # ====================
-# Server
+# State
 # ====================
 
 class State
   property counter : Int64
-  def initialize (counter : Int64)
+
+  def initialize(counter : Int64 = 0)
     @counter = counter
   end
 end
 
-state = State.new(0)
+# ====================
+# Server
+# ====================
+
+store = Store(State).new
+store.run
 
 spawn do #
   Kemal.config.port = (ENV["PORT"]? || PORT).to_i
@@ -35,8 +71,10 @@ spawn do #
 
   # Root
   get "/#{ROOT}" do
+    state = State.new
+    store.set(state)
     Log.info { "State: #{state.counter}" }
-    <<-HTML    
+    <<-HTML
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/debug.js"></script>
 
@@ -61,12 +99,13 @@ spawn do #
 
   # Increment
   post "/increment" do |env|
-    ###
-    state.counter = state.counter + 1 
+    state = store.get
     Log.info { "State -> #{state.counter}" }
+    state.counter += 1
+    store.set(state)
     <<-HTML
-    <div> Counter: #{state.counter} </div>
-    HTML
+      <div> Counter: #{state.counter} </div>
+      HTML
   end
 
   # Run server
