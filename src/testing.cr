@@ -33,7 +33,7 @@ end
 def setState (state : State) 
   mut = Mutex.new
   mut.lock
-  state.counter += 1
+  yield
   mut.unlock
 end
 
@@ -86,7 +86,9 @@ spawn do #
   # Increment
   post "/increment" do |env|
     Log.info { "State -> #{state.counter}" }
-    setState(state)
+    setState(state) {
+      state.counter += 1 
+    }
     <<-HTML
       <div> Counter: #{getState(state).counter} </div>
       HTML
