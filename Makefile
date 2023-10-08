@@ -1,4 +1,8 @@
-all : test0 test1 test2 test3 test4
+all : test test0 test1 test2 test3 test4 test5
+
+test: src/testing.cr
+	crystal build -D preview_mt ./src/testing.cr -o test	
+
 
 test0: src/testing0.cr
 	crystal build -D preview_mt ./src/testing0.cr -o test0
@@ -13,4 +17,7 @@ test3: src/testing3.cr
 	crystal build -D preview_mt ./src/testing3.cr -o test3
 
 test4: src/testing4.cr
-	crystal build -D preview_mt ./src/testing4.cr -o testing4
+	crystal build -D preview_mt ./src/testing4.cr -o test4
+
+test5: src/testing5.cr
+	crystal build -D preview_mt ./src/testing5.cr -o test5
