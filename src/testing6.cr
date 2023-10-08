@@ -25,26 +25,6 @@ class State
   end
 end
 
-# ================
-# Store
-# ================
-
-
-def setState (state : State) 
-  mut = Mutex.new
-  mut.lock
-  yield
-  mut.unlock
-end
-
-def getState (oldState : State)
-  mut = Mutex.new
-  mut.lock
-  newState = State.new(oldState.counter)
-  mut.unlock
-  return newState
-end
-
 
 # ====================
 # Server
@@ -58,6 +38,7 @@ spawn do #
   # Kemal.config.env = "production"
   Kemal.config.env = "development"
 
+
   # Root
   get "/#{ROOT}" do
     <<-HTML
@@ -70,28 +51,32 @@ spawn do #
       <h1> HTMX tests </h1>
     </div>
     
-    <form>
+    <form id="cpt">
+        <br>
+        Counter:<input name="count" value="0" />
         <br>
         <button hx-post="/increment" hx-target="#cpt" hx-ext="debug">
-            increment counter
-        </button>
+        increment counter
+       </button>
     </form>
-    <br>
-    <div id="cpt"> 
-      <div> Counter: 0 </div>
-    </div>
     HTML
   end
 
   # Increment
   post "/increment" do |env|
-    Log.info { "State -> #{state.counter}" }
-    setState(state) {
-      state.counter += 1
-    }
+    Log.info { "env => #{env}" }
+    count = env.params.body["count"].to_i
+    count += 1
+    Log.info { "State -> #{count}" }
     <<-HTML
-      <div> Counter: #{getState(state).counter} </div>
-      HTML
+    <form id="cpt">
+        <br>
+        Counter:<input name="count" value=#{count} />
+        <br>
+        <button hx-post="/increment" hx-target="#cpt" hx-ext="debug">
+        increment counter
+    </button>
+    HTML
   end
 
   # Run server
